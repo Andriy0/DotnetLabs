@@ -1,15 +1,15 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace DotnetLabs.Models;
 
-public class Category
+public class Product
 {
     public long Id { get; init; }
     
     [MaxLength(100)]
     public string Title { get; set; }
     
-    [JsonIgnore]
-    public ICollection<Product> Products { get; set; }
+    public long CategoryId { get; set;  }
+    
+    public Category Category { get; set; }
 }

@@ -15,9 +15,15 @@ public class AppDbContext(IConfiguration configuration) : DbContext
     //OnModelCreating() method is used to configure the model using ModelBuilder Fluent API
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //use this to configure the model
+        modelBuilder.Entity<Category>()
+        .HasMany(c => c.Products)
+        .WithOne(p => p.Category)
+        .HasForeignKey(p => p.CategoryId)
+        .IsRequired()
+        .OnDelete(DeleteBehavior.Cascade);
     }
 
     //Adding Domain Classes as DbSet Properties
     public DbSet<Category> Categories { get; init; }
+    public DbSet<Product> Products { get; init; }
 }
