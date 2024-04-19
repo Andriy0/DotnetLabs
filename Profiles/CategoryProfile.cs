@@ -13,5 +13,8 @@ public class CategoryProfile : Profile
         
         CreateMap<Category, CreateCategoryViewModel>()
             .ReverseMap();
+        
+        CreateMap<Category, UpdateCategoryViewModel>()
+            .ReverseMap();
     }
 }

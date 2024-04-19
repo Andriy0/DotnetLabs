@@ -1,37 +1,38 @@
 using AutoMapper;
-using DotnetLabs.Data;
+using DotnetLabs.Data.Repositories;
 using DotnetLabs.Models;
 using DotnetLabs.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace DotnetLabs.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CategoriesController(AppDbContext context, IMapper mapper) : ControllerBase
+public class CategoriesController(IMapper mapper, CategoryRepository repository) : ControllerBase
 {
     [HttpGet]
     public async Task<IEnumerable<CategoryViewModel>> Get()
     {
-        var categories = await context.Categories.ToListAsync();
+        var categories = await repository.GetAll();
         
         return mapper.Map<IEnumerable<CategoryViewModel>>(categories);
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<IActionResult> Get(long id)
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
     {
-        var category = await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+        var category = await repository.Get(id);
         if (category == null) return NotFound();
+        
         return Ok(mapper.Map<CategoryViewModel>(category));
     }
     
     [HttpGet("{title}")]
     public async Task<IActionResult> Get(string title)
     {
-        var category = await context.Categories.FirstOrDefaultAsync(c => c.Title == title);
+        var category = await repository.GetByTitle(title);
         if (category == null) return NotFound();
+        
         return Ok(mapper.Map<CategoryViewModel>(category));
     }
 
@@ -39,28 +40,27 @@ public class CategoriesController(AppDbContext context, IMapper mapper) : Contro
     public async Task<IActionResult> Post(CreateCategoryViewModel categoryVm)
     {
         var category = mapper.Map<Category>(categoryVm);
-        context.Add(category);
-        await context.SaveChangesAsync();
-        return Ok(category);
+        await repository.Add(category);
+        
+        return Ok(mapper.Map<CategoryViewModel>(category));
     }
     
-    [HttpPut("{id:long}")]
-    public async Task<IActionResult> Put(long id, CategoryViewModel categoryVm)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(int id, UpdateCategoryViewModel categoryVm)
     {
-        var category = await context.Categories.FindAsync(id);
-        if (category == null) return NotFound();
-        category.Title = categoryVm.Title;
-        await context.SaveChangesAsync();
-        return Ok(category);
+        var category = mapper.Map<Category>(categoryVm);
+        if (id != category.Id) { return BadRequest(); }
+        
+        await repository.Update(category);
+        return Ok(mapper.Map<CategoryViewModel>(category));
     }
     
-    [HttpDelete("{id:long}")]
-    public async Task<IActionResult> Delete(long id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        var category = await context.Categories.FindAsync(id);
-        if (category == null) return NotFound();
-        context.Categories.Remove(category);
-        await context.SaveChangesAsync();
-        return Ok(category);
+        var category = await repository.Delete(id);
+        if (category == null) { return NotFound(); }
+        
+        return Ok(mapper.Map<CategoryViewModel>(category));
     }
 }

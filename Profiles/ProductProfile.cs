@@ -16,5 +16,8 @@ public class ProductProfile : Profile
         
         CreateMap<Product, ProductCreatedViewModel>()
             .ReverseMap();
+        
+        CreateMap<Product, UpdateProductViewModel>()
+            .ReverseMap();
     }
 }

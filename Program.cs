@@ -1,4 +1,5 @@
 using DotnetLabs.Data;
+using DotnetLabs.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<CategoryRepository>();
+builder.Services.AddScoped<ProductRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
