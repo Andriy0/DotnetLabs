@@ -1,19 +1,21 @@
 using AutoMapper;
-using DotnetLabs.Data.Repositories;
 using DotnetLabs.Models;
+using DotnetLabs.Services.Categories;
 using DotnetLabs.ViewModels;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotnetLabs.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CategoriesController(IMapper mapper, CategoryRepository repository) : ControllerBase
+public class CategoriesController(IMapper mapper, IMediator mediator) 
+    : ControllerBase
 {
     [HttpGet]
     public async Task<IEnumerable<CategoryViewModel>> Get()
     {
-        var categories = await repository.GetAll();
+        var categories = await mediator.Send(new GetAllCategoriesQuery());
         
         return mapper.Map<IEnumerable<CategoryViewModel>>(categories);
     }
@@ -21,7 +23,7 @@ public class CategoriesController(IMapper mapper, CategoryRepository repository)
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
-        var category = await repository.Get(id);
+        var category = await mediator.Send(new GetCategoryQuery { Id = id });
         if (category == null) return NotFound();
         
         return Ok(mapper.Map<CategoryViewModel>(category));
@@ -30,7 +32,7 @@ public class CategoriesController(IMapper mapper, CategoryRepository repository)
     [HttpGet("{title}")]
     public async Task<IActionResult> Get(string title)
     {
-        var category = await repository.GetByTitle(title);
+        var category = await mediator.Send(new GetCategoryByTitleQuery { Title = title });
         if (category == null) return NotFound();
         
         return Ok(mapper.Map<CategoryViewModel>(category));
@@ -39,8 +41,8 @@ public class CategoriesController(IMapper mapper, CategoryRepository repository)
     [HttpPost]
     public async Task<IActionResult> Post(CreateCategoryViewModel categoryVm)
     {
-        var category = mapper.Map<Category>(categoryVm);
-        await repository.Add(category);
+        // var category = mapper.Map<Category>(categoryVm);
+        var category = await mediator.Send(new CreateCategoryCommand { Title = categoryVm.Title });
         
         return Ok(mapper.Map<CategoryViewModel>(category));
     }
@@ -48,17 +50,17 @@ public class CategoriesController(IMapper mapper, CategoryRepository repository)
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Put(int id, UpdateCategoryViewModel categoryVm)
     {
-        var category = mapper.Map<Category>(categoryVm);
-        if (id != category.Id) { return BadRequest(); }
+        // var category = mapper.Map<Category>(categoryVm);
+        if (id != categoryVm.Id) { return BadRequest(); }
         
-        await repository.Update(category);
+        var category = await mediator.Send(new UpdateCategoryCommand { Category = mapper.Map<Category>(categoryVm) });
         return Ok(mapper.Map<CategoryViewModel>(category));
     }
     
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var category = await repository.Delete(id);
+        var category = await mediator.Send(new DeleteCategoryCommand { Id = id });
         if (category == null) { return NotFound(); }
         
         return Ok(mapper.Map<CategoryViewModel>(category));

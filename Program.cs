@@ -1,5 +1,6 @@
 using DotnetLabs.Data;
 using DotnetLabs.Data.Repositories;
+using DotnetLabs.Services.Categories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetCategoryQueryHandler>());
 builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<ProductRepository>();
 var app = builder.Build();
