@@ -2,6 +2,7 @@ using AutoMapper;
 using DotnetLabs.Models;
 using DotnetLabs.Services.Categories;
 using DotnetLabs.ViewModels;
+using DotnetLabs.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ public class CategoriesController(IMapper mapper, IMediator mediator)
     : ControllerBase
 {
     [HttpGet]
+    [Authorize]
     public async Task<IEnumerable<CategoryViewModel>> Get()
     {
         var categories = await mediator.Send(new GetAllCategoriesQuery());
@@ -41,7 +43,6 @@ public class CategoriesController(IMapper mapper, IMediator mediator)
     [HttpPost]
     public async Task<IActionResult> Post(CreateCategoryViewModel categoryVm)
     {
-        // var category = mapper.Map<Category>(categoryVm);
         var category = await mediator.Send(new CreateCategoryCommand { Title = categoryVm.Title });
         
         return Ok(mapper.Map<CategoryViewModel>(category));
@@ -50,7 +51,6 @@ public class CategoriesController(IMapper mapper, IMediator mediator)
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Put(int id, UpdateCategoryViewModel categoryVm)
     {
-        // var category = mapper.Map<Category>(categoryVm);
         if (id != categoryVm.Id) { return BadRequest(); }
         
         var category = await mediator.Send(new UpdateCategoryCommand { Category = mapper.Map<Category>(categoryVm) });
