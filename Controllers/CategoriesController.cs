@@ -2,6 +2,7 @@ using AutoMapper;
 using DotnetLabs.Models;
 using DotnetLabs.Services.Categories;
 using DotnetLabs.ViewModels;
+using DotnetLabs.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ public class CategoriesController(IMapper mapper, IMediator mediator)
     : ControllerBase
 {
     [HttpGet]
+    [Authorize]
     public async Task<IEnumerable<CategoryViewModel>> Get()
     {
         var categories = await mediator.Send(new GetAllCategoriesQuery());
